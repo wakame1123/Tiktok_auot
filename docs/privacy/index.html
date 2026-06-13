@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - movie_app</title>
+  <style>
+    body { font-family: "Segoe UI", sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; line-height: 1.7; color: #222; }
+    a { color: #fe2c55; }
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.1rem; margin-top: 2rem; }
+    table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; }
+    hr { margin: 2rem 0; border: none; border-top: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <p><a href="../">← movie_app</a></p>
+  <h1>Privacy Policy</h1>
+  <p><strong>Last updated:</strong> June 13, 2026</p>
+  <p>This policy describes how <strong>movie_app</strong> handles information. The App runs locally; we do not operate a cloud server that collects your data.</p>
+
+  <h2>1. Data Stored Locally</h2>
+  <table>
+    <tr><th>Data</th><th>Purpose</th><th>Location</th></tr>
+    <tr><td>OAuth tokens</td><td>Post after authorization</td><td>data/tokens.json</td></tr>
+    <tr><td>Client Key / Secret</td><td>TikTok API connection</td><td>.env</td></tr>
+    <tr><td>Post history</td><td>Dashboard display</td><td>data/jobs.db</td></tr>
+    <tr><td>Video files</td><td>Source for posts</td><td>Watch folder</td></tr>
+  </table>
+
+  <h2>2. Data Sent to TikTok</h2>
+  <p>Login (OAuth) and video uploads via official TikTok APIs. See <a href="https://www.tiktok.com/legal/privacy-policy">TikTok Privacy Policy</a>.</p>
+
+  <h2>3. What We Do NOT Collect</h2>
+  <ul>
+    <li>No analytics or telemetry</li>
+    <li>No selling data to third parties</li>
+    <li>No server-side video storage</li>
+  </ul>
+
+  <h2>4. Contact</h2>
+  <p><a href="https://github.com/wakame1123/Tiktok_auot/issues">GitHub Issues</a></p>
+
+  <hr>
+
+  <h1>プライバシーポリシー（日本語）</h1>
+  <p><strong>最終更新日:</strong> 2026年6月13日</p>
+  <p><strong>movie_app</strong> は PC 上でローカル動作します。クラウドで個人データを収集しません。</p>
+  <p>OAuth トークン・API キー・投稿履歴はすべてローカルに保存され、投稿時のみ TikTok API へ送信されます。</p>
+  <p>お問い合わせ: <a href="https://github.com/wakame1123/Tiktok_auot/issues">GitHub Issues</a></p>
+</body>
+</html>
