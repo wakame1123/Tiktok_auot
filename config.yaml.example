@@ -1,0 +1,39 @@
+# 監視フォルダ（.env の WATCH_FOLDER より優先）
+watch_folder: "./watch"
+
+# 処理済み・失敗ファイルの移動先（空なら移動しない）
+processed_folder: "./watch/processed"
+failed_folder: "./watch/failed"
+
+# ファイル書き込み完了待ち（秒）— コピー中のファイルを誤検知しない
+stable_wait_seconds: 5
+
+# 対応動画拡張子
+video_extensions:
+  - ".mp4"
+  - ".mov"
+  - ".webm"
+
+# 投稿モード: direct / draft
+post_mode: "direct"
+
+# 公開範囲
+privacy_level: "PUBLIC_TO_EVERYONE"
+
+# キャプションテンプレート
+caption_template: |
+  {title}
+
+  {live_time} からLIVE配信します！
+  リマインダー設定お願いします🙏
+
+  {hashtags}
+
+default_hashtags:
+  - "TikTokLIVE"
+  - "ライブ告知"
+  - "時間予告"
+
+# ファイル名から配信時刻を推測するパターン（任意）
+# 例: 20250613_2100_告知.mp4 → 2025-06-13 21:00
+filename_time_pattern: "^\\d{8}_\\d{4}"

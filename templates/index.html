@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TikTok 時間予告 自動投稿</title>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --card: #1a1a1a;
+      --text: #f5f5f5;
+      --muted: #aaa;
+      --accent: #fe2c55;
+      --ok: #25d366;
+      --warn: #ffb020;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Hiragino Sans", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 24px; }
+    h1 { font-size: 1.6rem; margin-bottom: 8px; }
+    .subtitle { color: var(--muted); margin-bottom: 24px; }
+    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #2a2a2a;
+    }
+    .card h2 { margin: 0 0 12px; font-size: 1rem; }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .badge.ok { background: rgba(37,211,102,.15); color: var(--ok); }
+    .badge.warn { background: rgba(255,176,32,.15); color: var(--warn); }
+    .badge.err { background: rgba(254,44,85,.15); color: var(--accent); }
+    code, .mono { font-family: Consolas, monospace; font-size: 0.9rem; }
+    .path {
+      background: #111;
+      padding: 10px 12px;
+      border-radius: 8px;
+      word-break: break-all;
+      margin: 8px 0;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-secondary { background: #333; color: white; }
+    .btn + .btn { margin-left: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { padding: 10px 8px; border-bottom: 1px solid #2a2a2a; text-align: left; vertical-align: top; }
+    th { color: var(--muted); font-weight: 500; }
+    .steps { padding-left: 20px; }
+    .steps li { margin-bottom: 8px; }
+    footer { margin-top: 32px; color: var(--muted); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>TikTok 時間予告 自動投稿</h1>
+    <p class="subtitle">指定フォルダに動画を置くと、TikTokへ自動投稿します</p>
+
+    <div class="grid">
+      <div class="card">
+        <h2>接続状態</h2>
+        <p>
+          API設定:
+          {% if configured %}
+            <span class="badge ok">設定済み</span>
+          {% else %}
+            <span class="badge err">未設定</span>
+          {% endif %}
+        </p>
+        <p>
+          TikTok認証:
+          {% if authenticated %}
+            <span class="badge ok">認証済み</span>
+          {% else %}
+            <span class="badge warn">未認証</span>
+          {% endif %}
+        </p>
+        {% if open_id %}
+          <p class="mono">Open ID: {{ open_id }}</p>
+        {% endif %}
+        <p style="margin-top:16px">
+          {% if configured and not authenticated %}
+            <a class="btn btn-primary" href="/auth/login">TikTokでログイン</a>
+          {% elif authenticated %}
+            <form method="post" action="/auth/logout" style="display:inline">
+              <button class="btn btn-secondary" type="submit">ログアウト</button>
+            </form>
+          {% endif %}
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>監視フォルダ</h2>
+        <div class="path mono">{{ watch_folder }}</div>
+        <p>投稿モード: <strong>{{ post_mode }}</strong> / 公開範囲: <strong>{{ privacy_level }}</strong></p>
+        <form method="post" action="/scan" style="margin-top:12px">
+          <button class="btn btn-secondary" type="submit">今すぐスキャン</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>使い方</h2>
+      <ol class="steps">
+        <li><code>.env.example</code> を <code>.env</code> にコピーし、TikTok Developer の Client Key/Secret を設定</li>
+        <li>上の「TikTokでログイン」から OAuth 認証</li>
+        <li>監視フォルダに動画（.mp4 等）を配置 → 自動投稿</li>
+        <li>（任意）同名の <code>.meta.json</code> でキャプション・配信時刻を指定</li>
+      </ol>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>投稿履歴</h2>
+      {% if jobs %}
+      <table>
+        <thead>
+          <tr><th>ID</th><th>ファイル</th><th>状態</th><th>更新</th></tr>
+        </thead>
+        <tbody>
+          {% for job in jobs %}
+          <tr>
+            <td>{{ job.id }}</td>
+            <td class="mono">{{ job.file_path | replace('\\', '/') | truncate(60) }}</td>
+            <td>
+              {% if job.status == 'success' %}
+                <span class="badge ok">成功</span>
+              {% elif job.status == 'failed' %}
+                <span class="badge err">失敗</span>
+              {% else %}
+                <span class="badge warn">{{ job.status }}</span>
+              {% endif %}
+              {% if job.error %}<br><small>{{ job.error }}</small>{% endif %}
+            </td>
+            <td><small>{{ job.updated_at[:19] }}</small></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p style="color:var(--muted)">まだ投稿履歴がありません</p>
+      {% endif %}
+    </div>
+
+    <footer>
+      LIVE告知ステッカーは TikTok API 非対応のため、キャプションに配信時刻を含めて投稿します。
+      ステッカーが必要な場合は config で post_mode: draft に設定してください。
+    </footer>
+  </div>
+</body>
+</html>
